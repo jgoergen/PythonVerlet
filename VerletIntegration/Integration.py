@@ -1,6 +1,7 @@
 import math
 from Lib2D import Vector2D, CollisionFuncs
 
+
 class Integration(object):
 
     def __init__(self, options):
@@ -16,7 +17,7 @@ class Integration(object):
         self.stageMaxVect = Vector2D(790, 490)
         self.speedLimitMinVect = Vector2D(-4, -4)
         self.speedLimitMaxVect = Vector2D(4, 4)
-        self.stageFriction = 0.001
+        self.stageFriction = 0.005
 
         if (options is not None):
             if 'iterations' in options:
@@ -55,7 +56,7 @@ class Integration(object):
     def addBody(self, body):
         self.bodies.append(body)
 
-    def runTimeStep(self, timeDelta = 0):
+    def runTimeStep(self, timeDelta=0):
         if (self.paused is not True):
             self.runVerlet(timeDelta)
             self.satisfyConstraints()
@@ -72,7 +73,7 @@ class Integration(object):
             velocityVector.addToVector(self.gravity)
 
             # limit speed
-            # velocityVector.clamp(speedLimitMinVect, speedLimitMaxVect)
+            velocityVector.clamp(self.speedLimitMinVect, self.speedLimitMaxVect)
 
             # adjust for timestep delta
             # velocityVector.multiplyBy(timeDeltaSquare)
@@ -95,13 +96,13 @@ class Integration(object):
                 self.particles[i].vector.clamp(
                     self.stageMinVect,
                     self.stageMaxVect)
-        
+
         for j in range(0, self.iterations):
             if (len(self.constraints) > 0):
                 self.runConstraints()
 
             self.runParticleCollisions()
-            
+
             if (len(self.constraints) > 0):
                 self.runParticleOnLineCollisions()
                 self.runBodyCollisions()
@@ -138,13 +139,14 @@ class Integration(object):
             self.constraints[i].ends.startParticle.vector.addToVector(addVect3)
             self.constraints[i].ends.endParticle.vector.subtractByVector(addVect2)
 
+            # todo: fix snapping!
             # snapping
-            if (abs(diff) > self.constraints[i].tolerance):
-                removedConstraint = self.constraints.pop(i)
-                i = i - 1
+#            if (abs(diff) > self.constraints[i].tolerance):
+#                removedConstraint = self.constraints.pop(i)
+#                i = i - 1
 
-                if (self.constraintSnapCallback is not None):
-                    self.constraintSnapCallback(removedConstraint[0])
+#                if (self.constraintSnapCallback is not None):
+#                    self.constraintSnapCallback(removedConstraint[0])
 
     def runParticleCollisions(self):
         totalRadius = 0
@@ -161,11 +163,11 @@ class Integration(object):
 
                 # first pass check for speed
                 if (abs(self.particles[i].vector.x - self.particles[o].vector.x) > totalRadius or
-                    abs(self.particles[i].vector.y - self.particles[o].vector.y) > totalRadius):
+                        abs(self.particles[i].vector.y - self.particles[o].vector.y) > totalRadius):
                     continue
 
                 distance = self.particles[i].vector.distanceTo(self.particles[o].vector)
-                
+
                 if (distance < totalRadius):
                     collisionVector = self.particles[i].vector.getSubtractedFromVector(self.particles[o].vector).divideByScalar(distance)
 
@@ -234,19 +236,19 @@ class Integration(object):
                 continue
 
             for o in range(0, len(self.constraints)):
-                if (self.constraints[o].collides and 
-                    self.particles[i].objectID != self.constraints[o].objectID and 
-                    self.particles[i] != self.constraints[o].ends.startParticle and 
-                    self.particles[i] != self.constraints[o].ends.endParticle):
+                if (self.constraints[o].collides and
+                    self.particles[i].objectID != self.constraints[o].objectID and
+                    self.particles[i] != self.constraints[o].ends.startParticle and
+                        self.particles[i] != self.constraints[o].ends.endParticle):
 
-                    if (CollisionFuncs.CircleCrossesLine(
+                    if (1 == 2 and CollisionFuncs.CircleCrossesLine(
                         self.particles[i].vector,
                         self.constraints[o].ends.startParticle.vector,
                         self.constraints[o].ends.endParticle.vector,
-                        self.particles[i].radius)):
+                            self.particles[i].radius)):
 
                         collisionData = CollisionFuncs.GetCircleCrossingLineCollision(
-                            self.particles[i].vector, 
+                            self.particles[i].vector,
                             self.constraints[o].ends.startParticle.vector,
                             self.constraints[o].ends.endParticle.vector,
                             self.particles[i].radius)

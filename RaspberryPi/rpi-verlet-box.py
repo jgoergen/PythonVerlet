@@ -1,4 +1,6 @@
-import random, math, time
+import random
+import math
+import time
 from Lib2D import Vector2D
 from VerletIntegration import Integration, Particle, Constraint, Prefabs
 from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
@@ -23,7 +25,7 @@ options = RGBMatrixOptions()
 options.rows = 32
 options.cols = 64
 # options.brightness = self.args.led_brightness
-matrix = RGBMatrix(options = options)
+matrix = RGBMatrix(options=options)
 
 # init mpu9250
 # https://github.com/FaBoPlatform/FaBo9AXIS-MPU9250-Python/blob/master/example/read9axis.py
@@ -48,22 +50,25 @@ for x in range(0, 4):
             verlet,
             x * 20,
             y * 3,
-            random.randint(5, 15), 
+            random.randint(5, 15),
             random.randint(5, 15),
             random.randint(0, 360),
             True,
             0.65,
             objectID)
 
-        colors.append(graphics.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+        colors.append(graphics.Color(random.randint(0, 255),
+                                     random.randint(0, 255), random.randint(0, 255)))
         objectID += 1
 
-lineColor = graphics.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+lineColor = graphics.Color(random.randint(
+    0, 255), random.randint(0, 255), random.randint(0, 255))
 
 highestMX = 0
 lowestMX = 0
 highestMY = 0
 lowestMY = 0
+
 
 def testMPU():
     # accel = mpu9250.readAccel()
@@ -90,10 +95,11 @@ def testMPU():
     if mag['y'] < lowestMY:
         lowestMY = mag['y']
 
-    #print " X: " , mag['x'], ": ", lowestMX, " - ", highestMX
-    #print " my = " , mag['y'], ": ", lowestMY, " - ", highestMY
-    #print " mz = " , ( mag['z'] )
-    #print('')
+    # print " X: " , mag['x'], ": ", lowestMX, " - ", highestMX
+    # print " my = " , mag['y'], ": ", lowestMY, " - ", highestMY
+    # print " mz = " , ( mag['z'] )
+    # print('')
+
 
 skip = 0
 
@@ -108,18 +114,18 @@ while not done:
         # print x, y
     else:
         skip += 1
-    
+
     verlet.runTimeStep()
     matrix.Clear()
 
     for constraint in verlet.constraints:
         if ('drawn' in constraint.data and constraint.data['drawn'] == True):
             graphics.DrawLine(
-                matrix, 
-                constraint.ends.startParticle.vector.x, 
-                constraint.ends.startParticle.vector.y, 
-                constraint.ends.endParticle.vector.x, 
-                constraint.ends.endParticle.vector.y, 
+                matrix,
+                constraint.ends.startParticle.vector.x,
+                constraint.ends.startParticle.vector.y,
+                constraint.ends.endParticle.vector.x,
+                constraint.ends.endParticle.vector.y,
                 colors[constraint.objectID])
 
     time.sleep(0.015)

@@ -1,5 +1,6 @@
 import pygame
-import random, math
+import random
+import math
 from Lib2D import Vector2D
 from VerletIntegration import Integration, Particle, Constraint, Prefabs
 
@@ -8,8 +9,8 @@ from VerletIntegration import Integration, Particle, Constraint, Prefabs
 # put any adjustable settings here that would be interesting to tinker with.
 
 FPS = 30
-CANVAS_WIDTH = 800
-CANVAS_HEIGHT = 500
+CANVAS_WIDTH = 1024
+CANVAS_HEIGHT = 768
 GRAVITY_DAMPENING = 0.001
 
 ##########################################################################
@@ -27,23 +28,24 @@ verlet = Integration({
 
 for i in range(0, 100):
     verlet.addParticle(Particle({
-            'vector': Vector2D(random.randint(0, CANVAS_WIDTH), random.randint(0, CANVAS_HEIGHT)),
-            'radius': 5 + random.randint(0, 40),
-            'collides': True,
-            'data': { 'drawn': True }
-        }))
+        'vector': Vector2D(random.randint(0, CANVAS_WIDTH), random.randint(0, CANVAS_HEIGHT)),
+        'radius': 20 + random.randint(0, 30),
+        'collides': True,
+        'data': {'drawn': True}
+    }))
 
 while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
 
-    screen.fill((0,0,0))
+    screen.fill((0, 0, 0))
 
+    verlet.runTimeStep()
     verlet.runTimeStep()
 
     for particle in verlet.particles:
         pygame.draw.circle(screen, (0, 255, 0), (int(particle.vector.x), int(particle.vector.y)), particle.radius, 1)
 
     pygame.display.flip()
-    clock.tick(FPS)
+    # clock.tick(FPS)

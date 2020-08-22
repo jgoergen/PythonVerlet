@@ -1,6 +1,7 @@
 import math
 from Lib2D import Vector2D
 
+
 class Body(object):
 
     def __init__(self, options):
@@ -37,30 +38,31 @@ class Body(object):
         maxY = -10000
 
         for i in range(0, len(self.uniqueVectors)):
-            minX = min( minX, self.uniqueVectors[i].x, self.uniqueVectors[i].x)
-            minY = min( minY, self.uniqueVectors[i].y, self.uniqueVectors[i].y)
-            maxX = max( maxX, self.uniqueVectors[i].x, self.uniqueVectors[i].x)
-            maxY = max( maxY, self.uniqueVectors[i].y, self.uniqueVectors[i].y)
+            vect = self.uniqueVectors[i]
+            minX = minX if minX < vect.x else vect.x
+            minY = minY if minY < vect.y else vect.y
+            maxX = maxX if maxX > vect.x else vect.x
+            maxY = maxY if maxY > vect.y else vect.y
 
         return [minX, minY, maxX, maxY]
 
     def projectToAxis(self, axisVect):
         dotP = axisVect.dotProduct(self.uniqueVectors[0])
-        minVal = dotP 
+        minVal = dotP
         maxVal = dotP
-        
+
         for i in range(0, len(self.uniqueVectors)):
-            # Project the rest of the vertices onto the axis and extend 
+            # Project the rest of the vertices onto the axis and extend
             # the interval to the left/right if necessary
             dotP = axisVect.dotProduct(self.uniqueVectors[i])
-            minVal = min(dotP, minVal)
-            maxVal = max(dotP, maxVal)
+            minVal = minVal if minVal < dotP else dotP
+            maxVal = maxVal if maxVal > dotP else dotP
 
         return [minVal, maxVal]
 
     def getCollision(self, body):
         # initialize the length of the collision vector to a relatively large value
-        minDistance = 10000 
+        minDistance = 10000
         collisionAxis = None
         collisionEdge = None
         collisionVector = None
@@ -79,13 +81,13 @@ class Body(object):
 
             # calculate the axis perpendicular to this edge and normalize it
             axisVect = Vector2D(
-                edge.startParticle.vector.y - edge.endParticle.vector.y, 
-                edge.endParticle.vector.x - edge.startParticle.vector.x) 
+                edge.startParticle.vector.y - edge.endParticle.vector.y,
+                edge.endParticle.vector.x - edge.startParticle.vector.x)
 
             axisVect.normalize()
             projection1 = self.projectToAxis(axisVect)
             projection2 = body.projectToAxis(axisVect)
-            
+
             # calculate the distance between the two intervals - see below
             distance = projection2[0] - projection1[1] if projection1[0] < projection2[0] else projection1[0] - projection2[1]
 
@@ -115,10 +117,10 @@ class Body(object):
             .getSubtractedFromVector(
                 primaryBody.getCenter())) > 0
 
-        # remember that the line equation is N*( R - R0 ). We choose B2->Center 
+        # remember that the line equation is N*( R - R0 ). We choose B2->Center
         # as R0 the normal N is given by the collision normal
         if (sign == True):
-            collisionAxis.reverse() # reverse the collision normal if it points away from B1
+            collisionAxis.reverse()  # reverse the collision normal if it points away from B1
 
         smallestDistance = 10000
 
@@ -127,8 +129,8 @@ class Body(object):
             vertexDistance = collisionAxis.dotProduct(
                 primaryBody.uniqueVectors[i].getSubtractedFromVector(
                     secondaryBody.getCenter()))
-        
-            # if the measured distance is smaller than the smallest distance reported 
+
+            # if the measured distance is smaller than the smallest distance reported
             # so far, set the smallest distance and the collision vertex
             if (vertexDistance < smallestDistance):
                 smallestDistance = vertexDistance

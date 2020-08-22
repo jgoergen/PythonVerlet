@@ -1,22 +1,23 @@
-import math  
+from math import sqrt, cos, sin, atan2
 from Lib2D import CachedMath
+import functools
+
 
 class Vector2D(object):
 
     NORMAL_TOLERANCE = 0.0001
 
-    def __init__(self, x = 0, y = 0):
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
     def magnitude(self):
-        return math.sqrt(self.x * self.x + self.y * self.y)
-        
+        return sqrt(self.x * self.x + self.y * self.y)
 
     def setMagnitude(self, magnitude):
         direction = self.direction()
-        self.x = math.cos(direction) * magnitude
-        self.y = math.sin(direction) * magnitude
+        self.x = cos(direction) * magnitude
+        self.y = sin(direction) * magnitude
         return self
 
     def length(self):
@@ -27,7 +28,7 @@ class Vector2D(object):
         return self
 
     def distanceTo(self, vector2D):
-        return math.sqrt((vector2D.x - self.x) * (vector2D.x - self.x) + (vector2D.y - self.y) * (vector2D.y - self.y))
+        return sqrt((vector2D.x - self.x) * (vector2D.x - self.x) + (vector2D.y - self.y) * (vector2D.y - self.y))
 
     def normalize(self):
         mag = self.magnitude()
@@ -62,7 +63,7 @@ class Vector2D(object):
             self.y = 0
 
         return Vector2D(
-            self.x / self.magnitude(), 
+            self.x / self.magnitude(),
             self.y / self.magnitude())
 
     def getAddedToScalar(self, value):
@@ -156,7 +157,7 @@ class Vector2D(object):
             self.y /= value.y
         except:
             pass
-            
+
         return self
 
     def dotProduct(self, value):
@@ -175,13 +176,13 @@ class Vector2D(object):
             self.x * -1,
             self.y * -1)
 
-    def direction(self): # radians
-        return math.atan2(self.y, self.x)
+    def direction(self):  # radians
+        return atan2(self.y, self.x)
 
-    def setDirection(self, angle): # radians
+    def setDirection(self, angle):  # radians
         magnitude = self.magnitude()
-        self.x = math.cos(angle) * magnitude
-        self.y = math.sin(angle) * magnitude
+        self.x = cos(angle) * magnitude
+        self.y = sin(angle) * magnitude
 
     def getRightNormal(self):
         normal = self.getNormalized()
@@ -212,6 +213,6 @@ class Vector2D(object):
 
     def copy(self):
         return Vector2D(self.x, self.y)
-    
+
     def toString(self):
         return 'x:' + str(self.x) + ", y:" + str(self.y)
