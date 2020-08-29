@@ -28,7 +28,7 @@ class Vector2D(object):
         return self
 
     def distanceTo(self, vector2D):
-        return sqrt((vector2D.x - self.x) * (vector2D.x - self.x) + (vector2D.y - self.y) * (vector2D.y - self.y))
+        return sqrt(((self.x - vector2D.x) ** 2) + ((self.y - vector2D.y) ** 2))
 
     def normalize(self):
         mag = self.magnitude()
@@ -161,10 +161,10 @@ class Vector2D(object):
         return self
 
     def dotProduct(self, value):
-        return self.x * value.x + self.y * value.y
+        return (self.x * value.x) + (self.y * value.y)
 
     def crossProduct(self, value):
-        return self.x * value.y - value.x * self.y
+        return (self.x * value.y) - (value.x * self.y)
 
     def reverse(self):
         self.x *= -1

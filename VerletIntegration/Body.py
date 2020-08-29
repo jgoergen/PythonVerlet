@@ -136,6 +136,10 @@ class Body(object):
                 smallestDistance = vertexDistance
                 collisionVector = primaryBody.uniqueVectors[i]
 
+        # verlet is build around recalcing these things in multiple passes, so the response needs to be dulled
+        # otherwise it appears 'jumpy'
+        collisionAxis.multiplyByScalar(0.5)
+
         return {
             'distance': minDistance,
             'collisionVector': collisionAxis,

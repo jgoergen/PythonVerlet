@@ -13,53 +13,31 @@ class CollisionFuncs(object):
     def CircleAndCircle():
         pass
 
-    # https:#stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm
-
     @staticmethod
-    def newCircleCrossesLine(pointVect, lineStartVect, lineEndVect, circleRadius=1):
-        # compute the triangle area times 2 (area = area2/2)
-        area2 = abs((lineEndVect.x - lineStartVect.x) * (pointVect.y - lineStartVect.y) - (pointVect.x - lineStartVect.x) * (lineEndVect.y - lineEndVect.y))
+    def CircleCrossesLine(pointVect, lineStartVect, lineEndVect, circleRadius=1):
+        # https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm
+        d = lineEndVect.getSubtractedFromVector(lineStartVect)
+        f = lineStartVect.getSubtractedFromVector(pointVect)
+        a = d.dotProduct(d)
+        b = 2 * f.dotProduct(d)
+        discriminant = b * b - 4 * a * (f.dotProduct(f) - circleRadius * circleRadius)
 
-        # compute the AB segment length
-        LAB = sqrt((lineEndVect.x - lineStartVect.x) ** 2 + (lineEndVect.y - lineStartVect.y) ** 2)
-
-        # compute the triangle height
-        h = area2 / LAB
-
-        # if the line intersects the circle
-        if(h < circleRadius):
-            return True
+        if(discriminant < 0):
+            return False
         else:
+            discriminant = sqrt(discriminant)
+            t1 = (-b - discriminant) / (2 * a)
+            t2 = (-b + discriminant) / (2 * a)
+
+            if(t1 >= 0 and t1 <= 1):
+                return True
+
+            if(t2 >= 0 and t2 <= 1):
+                return True
+
             return False
 
-    # https:#stackoverflow.com/questions/37224912/circle-line-segment-collision
-
-    @staticmethod
-    def circleCrossesLine(pointVect, lineStartVect, lineEndVect, circleRadius=1):
-        v1 = lineEndVect.getSubtractedFromVector(lineStartVect)
-        v2 = lineStartVect.getSubtractedFromVector(pointVect)
-        b = v1.dotProduct(v2)
-        c = 2 * (v1.x * v1.x + v1.y * v1.y)
-        b *= -2
-        d = sqrt(b * b - 2 * c * (v2.x * v2.x + v2.y * v2.y - circleRadius * circleRadius))
-
-        # no intercept
-        if (isinstance(d, numbers.Number)):
-            return False
-
-        # these represent the unit distance of point one and two on the line
-        u1 = (b - d) / c
-        u2 = (b + d) / c
-
-        if ((u1 <= 1 and u1 >= 0)):
-            return True
-
-        if ((u2 <= 1 and u2 >= 0)):
-            return True
-
-        return False
-
-    @staticmethod
+    @ staticmethod
     def GetCircleCrossingLineCollision(circleVector2D, lineStartVector, lineEndVector, circleRadius=1):
         # todo: shouldn't this take the circle radius into account?
 
@@ -68,6 +46,9 @@ class CollisionFuncs(object):
         dot = pointToStart.dotProduct(lineDirection)
         nearestPointOnLine = lineStartVector.getAddedToVector(lineDirection.getMultipliedByScalar(dot))
         collisionVector = circleVector2D.getSubtractedFromVector(nearestPointOnLine).normalize()
+        # verlet is build around recalcing these things in multiple passes, so the response needs to be dulled
+        # otherwise it appears 'jumpy'
+        collisionVector.multiplyByScalar(0.5)
 
         t = None
 

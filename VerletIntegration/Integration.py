@@ -62,8 +62,7 @@ class Integration(object):
             self.satisfyConstraints()
 
     def runVerlet(self, timeDelta):
-        # TODO
-        # timeDeltaSquare = math.pow(timeDelta, 2)
+        # TODO: take time delta into consideration
 
         for i in range(0, len(self.particles)):
             # derive velocity
@@ -76,7 +75,7 @@ class Integration(object):
             velocityVector.clamp(self.speedLimitMinVect, self.speedLimitMaxVect)
 
             # adjust for timestep delta
-            # velocityVector.multiplyBy(timeDeltaSquare)
+            # velocityVector.multiplyBy(timeDelta)
 
             # apply stage friction
             velocityVector.multiplyByScalar(1 - self.stageFriction)
@@ -170,22 +169,15 @@ class Integration(object):
 
                 if (distance < totalRadius):
                     collisionVector = self.particles[i].vector.getSubtractedFromVector(self.particles[o].vector).divideByScalar(distance)
-
-                    if (self.useMass):
-                        # slower but takes mass into account
-                        collisionVector.multiplyByScalar(0.5)
-                        dot1 = self.particles[i].vector.getSubtractedFromVector(self.particles[i].lastVector).dotProduct(collisionVector)
-                        dot2 = self.particles[o].vector.getSubtractedFromVector(self.particles[o].lastVector).dotProduct(collisionVector)
-                        optimizedP = 2.0 * (dot1 - dot2) / (self.particles[i].mass + self.particles[o].mass)
-
-                        collisionVector.getMultipliedByScalar(optimizedP)
-                        self.particles[o].vector.subtractByVector(collisionVector.getMultipliedByScalar(self.particles[i].mass))
-                        self.particles[i].vector.addToVector(collisionVector.getMultipliedByScalar(self.particles[o].mass))
-                    else:
-                        # faster but ignores mass
-                        collisionVector.multiplyByScalar(0.5)
-                        self.particles[o].vector.subtractByVector(collisionVector)
-                        self.particles[i].vector.addToVector(collisionVector)
+                    # verlet is build around recalcing these things in multiple passes, so the response needs to be dulled
+                    # otherwise it appears 'jumpy'
+                    collisionVector.multiplyByScalar(0.18)
+                    dot1 = self.particles[i].vector.getSubtractedFromVector(self.particles[i].lastVector).dotProduct(collisionVector)
+                    dot2 = self.particles[o].vector.getSubtractedFromVector(self.particles[o].lastVector).dotProduct(collisionVector)
+                    optimizedP = 2.0 * (dot1 - dot2) / (self.particles[i].mass + self.particles[o].mass)
+                    collisionVector.getMultipliedByScalar(optimizedP)
+                    self.particles[o].vector.subtractByVector(collisionVector.getMultipliedByScalar(self.particles[i].mass))
+                    self.particles[i].vector.addToVector(collisionVector.getMultipliedByScalar(self.particles[o].mass))
 
     def runBodyCollisions(self):
         for i in range(0, len(self.bodies)):
@@ -241,7 +233,7 @@ class Integration(object):
                     self.particles[i] != self.constraints[o].ends.startParticle and
                         self.particles[i] != self.constraints[o].ends.endParticle):
 
-                    if (1 == 2 and CollisionFuncs.CircleCrossesLine(
+                    if (CollisionFuncs.CircleCrossesLine(
                         self.particles[i].vector,
                         self.constraints[o].ends.startParticle.vector,
                         self.constraints[o].ends.endParticle.vector,

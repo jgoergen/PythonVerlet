@@ -26,12 +26,12 @@ verlet = Integration({
     'gravity': Vector2D(0, 0.05)
 })
 
-objectSize = 60
+objectSize = 100
 objectID = 0
 
-for x in range(0, 3):
-    for y in range(0, 3):
-        shape = 2  # random.randint(0, 3)
+for x in range(0, 5):
+    for y in range(0, 5):
+        shape = random.randint(0, 3)
 
         if (shape == 0):
             Prefabs.Triangle(
