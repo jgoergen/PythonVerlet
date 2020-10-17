@@ -1,4 +1,15 @@
-import random, math, time
+#!/usr/bin/env python
+
+# add the parent directory for importing
+import os
+import sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
+import random
+import math
+import time
 from Lib2D import Vector2D
 from VerletIntegration import Integration, Particle, Constraint, Prefabs
 from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
@@ -10,7 +21,7 @@ import FaBo9Axis_MPU9250
 
 FPS = 30
 CANVAS_WIDTH = 64
-CANVAS_HEIGHT = 32
+CANVAS_HEIGHT = 64
 GRAVITY_DAMPENING = 0.001
 
 ##########################################################################
@@ -20,10 +31,9 @@ done = False
 # init matrix
 
 options = RGBMatrixOptions()
-options.rows = 32
-options.cols = 64
-# options.brightness = self.args.led_brightness
-matrix = RGBMatrix(options = options)
+options.rows = CANVAS_WIDTH
+options.cols = CANVAS_HEIGHT
+matrix = RGBMatrix(options=options)
 
 # init mpu9250
 # https://github.com/FaBoPlatform/FaBo9AXIS-MPU9250-Python/blob/master/example/read9axis.py
@@ -33,7 +43,7 @@ mpu9250 = FaBo9Axis_MPU9250.MPU9250()
 # init verlet
 
 verlet = Integration({
-    'iterations': 2,
+    'iterations': 1,
     'stageMinVect': Vector2D(2, 2),
     'stageMaxVect': Vector2D(CANVAS_WIDTH - 2, CANVAS_HEIGHT - 2),
     'gravity': Vector2D(0, 0.05)
@@ -48,11 +58,12 @@ for x in range(0, 2):
             verlet,
             x * 20,
             y * 3,
-            random.randint(5, 15), 
+            random.randint(5, 15),
             0.5,
             objectID)
 
-        colors.append(graphics.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+        colors.append(graphics.Color(random.randint(0, 255),
+                                     random.randint(0, 255), random.randint(0, 255)))
         objectID += 1
 
 for x in range(0, 2):
@@ -61,96 +72,62 @@ for x in range(0, 2):
             verlet,
             x * 20,
             y * 3,
-            random.randint(5, 15), 
+            random.randint(5, 15),
             random.randint(5, 15),
             random.randint(0, 360),
             True,
             0.45,
             objectID)
 
-        colors.append(graphics.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+        colors.append(graphics.Color(random.randint(0, 255),
+                                     random.randint(0, 255), random.randint(0, 255)))
         objectID += 1
 
 for i in range(0, 5):
     verlet.addParticle(Particle({
-            'vector': Vector2D(random.randint(0, CANVAS_WIDTH), random.randint(0, CANVAS_HEIGHT)),
-            'radius': 1 + random.randint(0, 3),
-            'collides': True,
-            'objectID': objectID,
-            'data': { 
-                'drawn': True
-            }
-        }))
+        'vector': Vector2D(random.randint(0, CANVAS_WIDTH), random.randint(0, CANVAS_HEIGHT)),
+        'radius': 1 + random.randint(0, 3),
+        'collides': True,
+        'objectID': objectID,
+        'data': {
+            'drawn': True
+        }
+    }))
 
-    colors.append(graphics.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+    colors.append(graphics.Color(random.randint(0, 255),
+                                 random.randint(0, 255), random.randint(0, 255)))
     objectID += 1
-
-highestMX = 0
-lowestMX = 0
-highestMY = 0
-lowestMY = 0
-
-def testMPU():
-    # accel = mpu9250.readAccel()
-    # print " ax = " , ( accel['x'] )
-    # print " ay = " , ( accel['y'] )
-    # print " az = " , ( accel['z'] )
-
-    # gyro = mpu9250.readGyro()
-    # print " gx = " , ( gyro['x'] )
-    # print " gy = " , ( gyro['y'] )
-    # print " gz = " , ( gyro['z'] )
-
-    mag = mpu9250.readMagnet()
-
-    if mag['x'] > highestMX:
-        highestMX = mag['x']
-
-    if mag['x'] < lowestMX:
-        lowestMX = mag['x']
-
-    if mag['y'] > highestMY:
-        highestMY = mag['y']
-
-    if mag['y'] < lowestMY:
-        lowestMY = mag['y']
-
-    #print " X: " , mag['x'], ": ", lowestMX, " - ", highestMX
-    #print " my = " , mag['y'], ": ", lowestMY, " - ", highestMY
-    #print " mz = " , ( mag['z'] )
-    #print('')
 
 skip = 0
 
 while not done:
 
-    if skip > 10:
+    if skip > 5:
         skip = 0
         mag = mpu9250.readMagnet()
-        x = ((mag['x']) / 100) * -1
-        y = ((mag['y']) / 100) * -1
-        verlet.gravity = Vector2D(x, y)
-        # print x, y
+        x = ((mag["z"] - 60) / 800) * -1
+        y = ((mag["y"] + 27) / 800) * -1
+        if (x is not 0 and y is not 0):
+            verlet.gravity = Vector2D(x, y)
     else:
         skip += 1
-    
-    verlet.runTimeStep()
-    verlet.runTimeStep()
 
+    verlet.runTimeStep()
     matrix.Clear()
 
     for constraint in verlet.constraints:
         if ('drawn' in constraint.data and constraint.data['drawn'] == True):
             graphics.DrawLine(
-                matrix, 
-                constraint.ends.startParticle.vector.x, 
-                constraint.ends.startParticle.vector.y, 
-                constraint.ends.endParticle.vector.x, 
-                constraint.ends.endParticle.vector.y, 
+                matrix,
+                constraint.ends.startParticle.vector.x,
+                constraint.ends.startParticle.vector.y,
+                constraint.ends.endParticle.vector.x,
+                constraint.ends.endParticle.vector.y,
                 colors[constraint.objectID])
 
     for particle in verlet.particles:
         if ('drawn' in particle.data and particle.data['drawn'] == True):
-            graphics.DrawCircle(matrix, int(particle.vector.x), int(particle.vector.y), particle.radius, colors[particle.objectID])
+            graphics.DrawCircle(matrix, int(particle.vector.x), int(
+                particle.vector.y), particle.radius, colors[particle.objectID])
 
     time.sleep(0.015)
