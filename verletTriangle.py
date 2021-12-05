@@ -9,8 +9,8 @@ from VerletIntegration import Integration, Particle, Constraint, Prefabs
 # put any adjustable settings here that would be interesting to tinker with.
 
 FPS = 60
-CANVAS_WIDTH = 1024
-CANVAS_HEIGHT = 768
+CANVAS_WIDTH = 640
+CANVAS_HEIGHT = 480
 GRAVITY_DAMPENING = 0.001
 
 ##########################################################################
@@ -30,7 +30,7 @@ objectID = 0
 
 for x in range(0, 5):
     for y in range(0, 5):
-        triangleSize = random.randint(100, 150)
+        triangleSize = random.randint(50, 100)
         Prefabs.Triangle(
             verlet,
             random.randint(0, CANVAS_WIDTH),
@@ -52,7 +52,8 @@ while not done:
     verlet.runTimeStep()
 
     for constraint in verlet.constraints:
-        pygame.draw.line(screen, (0, 255, 0), (constraint.ends.startParticle.vector.x, constraint.ends.startParticle.vector.y), (constraint.ends.endParticle.vector.x, constraint.ends.endParticle.vector.y))
+        pygame.draw.line(screen, (0, 255, 0), (constraint.ends.startParticle.vector.x, constraint.ends.startParticle.vector.y),
+                         (constraint.ends.endParticle.vector.x, constraint.ends.endParticle.vector.y))
 
     pygame.display.flip()
     # clock.tick(FPS)
